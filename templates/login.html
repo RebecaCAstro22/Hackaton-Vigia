@@ -28,21 +28,12 @@
         margin: 0 auto;
     }
     
-    .logo-login {
-        width: 100px;
-        height: 100px;
-        background: var(--primary-light);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .logo-login-img {
+        width: 150px;
+        height: auto;
+        max-width: 200px;
         margin: 0 auto 1.5rem;
-        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
-    }
-    
-    .logo-login i {
-        color: var(--text-light);
-        font-size: 3rem;
+        display: block;
     }
     
     .login-card {
@@ -74,7 +65,7 @@
         left: 15px;
         top: 50%;
         transform: translateY(-50%);
-        color: var(--accent-purple);
+        color: #268aff;
         z-index: 10;
     }
     
@@ -83,28 +74,28 @@
     }
     
     .btn-login {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        background: linear-gradient(135deg, #268aff 0%, #40a0ff 50%, #4646c8 100%);
         border: none;
         color: white;
         padding: 12px;
         font-weight: 600;
         border-radius: 8px;
         width: 100%;
-        box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
+        box-shadow: 0 4px 15px rgba(38, 138, 255, 0.3);
         transition: all 0.3s;
     }
     
     .btn-login:hover {
-        background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-purple) 100%);
-        box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+        background: linear-gradient(135deg, #40a0ff 0%, #4646c8 100%);
+        box-shadow: 0 6px 20px rgba(38, 138, 255, 0.4);
         transform: translateY(-2px);
         color: white;
     }
     
     .btn-register {
         background: white;
-        border: 2px solid var(--primary-color);
-        color: var(--primary-color);
+        border: 2px solid #268aff;
+        color: #268aff;
         padding: 12px;
         font-weight: 600;
         border-radius: 8px;
@@ -113,9 +104,9 @@
     }
     
     .btn-register:hover {
-        background: var(--primary-color);
+        background: #268aff;
         color: white;
-        border-color: var(--primary-color);
+        border-color: #268aff;
     }
     
     .form-control {
@@ -126,8 +117,8 @@
     }
     
     .form-control:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.25);
+        border-color: #268aff;
+        box-shadow: 0 0 0 0.2rem rgba(38, 138, 255, 0.25);
     }
 </style>
 {% endblock %}
@@ -135,10 +126,7 @@
 {% block auth_content %}
 <div class="login-container">
     <div class="text-center mb-4">
-        <div class="logo-login">
-            <i class="bi bi-camera-video-fill"></i>
-        </div>
-        <h1 class="login-title" style="color: var(--text-light);">Vigia</h1>
+        <img src="{{ url_for('static', filename='img/logofinal.png') }}" alt="Vigia" class="logo-login-img">
     </div>
     
     <div class="login-card">

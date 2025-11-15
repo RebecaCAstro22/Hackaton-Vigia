@@ -148,7 +148,8 @@
             <header class="main-header">
                 <nav class="navbar">
                     <a href="{{ url_for('index') }}" class="navbar-brand">
-                        <b>VIGIA</b>
+                        <img src="{{ url_for('static', filename='img/logofinal.png') }}" alt="Vigia" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';">
+                        <b style="display: none;">VIGIA</b>
                     </a>
                     <ul class="navbar-nav">
                         {% if session.user_id %}

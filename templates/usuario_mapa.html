@@ -190,11 +190,23 @@
         }
         
         var icono = getIconForType(alerta.tipo);
+        // Formatear fecha y hora
+        var fechaHora = alerta.fecha_hora;
+        var fecha = fechaHora.indexOf('T') !== -1 ? fechaHora.split('T')[0] : fechaHora.split(' ')[0];
+        var hora = '';
+        if (fechaHora.indexOf('T') !== -1) {
+            hora = fechaHora.split('T')[1].split('.')[0];
+        } else if (fechaHora.indexOf(' ') !== -1) {
+            hora = fechaHora.split(' ')[1];
+        } else {
+            hora = 'N/A';
+        }
+        
         var popup = `
             <strong>${alerta.tipo.toUpperCase()}</strong><br>
             <strong>Ubicación:</strong> ${alerta.ubicacion}<br>
-            <strong>Fecha:</strong> ${alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0]}<br>
-            <strong>Hora:</strong> ${alerta.fecha_hora.split('T')[1].split('.')[0] if 'T' in alerta.fecha_hora else (alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else 'N/A')}
+            <strong>Fecha:</strong> ${fecha}<br>
+            <strong>Hora:</strong> ${hora}
         `;
         
         var marker = L.marker(coords, {icon: icono})

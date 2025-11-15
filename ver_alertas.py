@@ -1,10 +1,14 @@
 import sqlite3
+<<<<<<< HEAD
 from datetime import datetime
+=======
+>>>>>>> 31aa1689f52723d656035f6577cb8212810169d5
 
 # Abrir la base de datos
 conn = sqlite3.connect("alertas.db")
 cur = conn.cursor()
 
+<<<<<<< HEAD
 # Verificar si existe la columna 'tipo'
 try:
     cur.execute("SELECT tipo FROM alertas LIMIT 1")
@@ -23,10 +27,19 @@ alertas = cur.fetchall()
 print("\n" + "="*80)
 print(" " * 25 + "ALERTAS REGISTRADAS")
 print("="*80 + "\n")
+=======
+# Leer todas las alertas ordenadas por ID (últimas primero)
+cur.execute("SELECT * FROM alertas ORDER BY id DESC")
+
+alertas = cur.fetchall()
+
+print("\n=== ALERTAS REGISTRADAS ===\n")
+>>>>>>> 31aa1689f52723d656035f6577cb8212810169d5
 
 if len(alertas) == 0:
     print("No hay alertas guardadas aún.")
 else:
+<<<<<<< HEAD
     # Iconos por tipo
     iconos = {
         'arma': '🔫',
@@ -60,5 +73,9 @@ else:
 
 print(f"\nTotal de alertas: {len(alertas)}")
 print("="*80 + "\n")
+=======
+    for alerta in alertas:
+        print(alerta)
+>>>>>>> 31aa1689f52723d656035f6577cb8212810169d5
 
 conn.close()

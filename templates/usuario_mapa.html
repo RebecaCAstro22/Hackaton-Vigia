@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa - Vigia{% endblock %}
+
+{% block page_title %}Mapa de Alertas Graves{% endblock %}
+{% block page_subtitle %}Visualización de Ubicaciones{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('usuario_alertas') }}">Alertas Graves</a></li>
+<li class="active">Mapa</li>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 4px;
+    }
+    .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .info-box-alerta {
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i>
+            <strong>Mapa de Visualización:</strong> Este mapa muestra las ubicaciones de las alertas graves más recientes. 
+            Solo visualización - no se puede editar.
+        </div>
+    </div>
+</div>
+
+<!-- Mapa -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-map"></i> Mapa de Alertas Graves
+                </h3>
+            </div>
+            <div class="box-body">
+                <div id="map"></div>
+                <div class="legend mt-3">
+                    <h5><i class="bi bi-info-circle"></i> Leyenda:</h5>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #dc3545;"></i> 
+                        <strong>Arma Detectada</strong>
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #fd7e14;"></i> 
+                        <strong>Incendio Detectado</strong>
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #6f42c1;"></i> 
+                        <strong>Agresión Detectada</strong>
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #ffc107;"></i> 
+                        <strong>Vehículo Sospechoso</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Alertas en el Mapa -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-list-ul"></i> Alertas en el Mapa
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if alertas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Tipo</th>
+                                <th>Ubicación</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alerta in alertas %}
+                            <tr>
+                                <td>
+                                    {% if alerta.tipo == 'arma' %}
+                                        <span class="badge bg-danger">ARMA</span>
+                                    {% elif alerta.tipo == 'incendio' %}
+                                        <span class="badge bg-warning">INCENDIO</span>
+                                    {% elif alerta.tipo == 'agresion' %}
+                                        <span class="badge" style="background-color: #6f42c1; color: white;">AGRESIÓN</span>
+                                    {% elif alerta.tipo == 'vehiculo' %}
+                                        <span class="badge bg-warning">VEHÍCULO</span>
+                                    {% endif %}
+                                </td>
+                                <td><strong>{{ alerta.ubicacion }}</strong></td>
+                                <td>{{ alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0] }}</td>
+                                <td>{{ alerta.fecha_hora.split('T')[1].split('.')[0] if 'T' in alerta.fecha_hora else (alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else 'N/A') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> 
+                    No hay alertas graves para mostrar en el mapa.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Inicializar mapa centrado en El Salvador
+    var map = L.map('map').setView([13.7942, -88.8965], 8);
+    
+    // Agregar capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Iconos por tipo de alerta
+    function getIconForType(tipo) {
+        var color;
+        if (tipo === 'arma') color = '#dc3545';
+        else if (tipo === 'incendio') color = '#fd7e14';
+        else if (tipo === 'agresion') color = '#6f42c1';
+        else if (tipo === 'vehiculo') color = '#ffc107';
+        else color = '#6c757d';
+        
+        return L.divIcon({
+            className: 'custom-div-icon',
+            html: `<div style='background-color:${color};width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 5px rgba(0,0,0,0.5);'></div>`,
+            iconSize: [20, 20],
+            iconAnchor: [10, 10]
+        });
+    }
+    
+    // Coordenadas aproximadas de ubicaciones comunes en El Salvador
+    var ubicacionesCoords = {
+        'Centro de San Salvador': [13.6929, -89.2182],
+        'San Salvador': [13.6929, -89.2182],
+        'Santa Ana': [13.9942, -89.5597],
+        'San Miguel': [13.4833, -88.1833],
+        'Soyapango': [13.7100, -89.1400],
+        'Apopa': [13.8078, -89.1794],
+        'Mejicanos': [13.7400, -89.2100],
+        'La Libertad': [13.4881, -89.3219]
+    };
+    
+    // Agregar marcadores de alertas
+    var alertas = {{ alertas|tojson }};
+    var markers = [];
+    
+    alertas.forEach(function(alerta) {
+        // Intentar obtener coordenadas de la ubicación
+        var coords = ubicacionesCoords[alerta.ubicacion];
+        if (!coords) {
+            // Si no está en el diccionario, usar coordenadas aleatorias cerca del centro
+            coords = [
+                13.7942 + (Math.random() - 0.5) * 0.5,
+                -88.8965 + (Math.random() - 0.5) * 0.5
+            ];
+        }
+        
+        var icono = getIconForType(alerta.tipo);
+        var popup = `
+            <strong>${alerta.tipo.toUpperCase()}</strong><br>
+            <strong>Ubicación:</strong> ${alerta.ubicacion}<br>
+            <strong>Fecha:</strong> ${alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0]}<br>
+            <strong>Hora:</strong> ${alerta.fecha_hora.split('T')[1].split('.')[0] if 'T' in alerta.fecha_hora else (alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else 'N/A')}
+        `;
+        
+        var marker = L.marker(coords, {icon: icono})
+            .addTo(map)
+            .bindPopup(popup);
+        
+        markers.push(marker);
+    });
+    
+    // Ajustar vista si hay marcadores
+    if (markers.length > 0) {
+        var group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+    }
+</script>
+{% endblock %}
+

@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Vigia - Sistema de Seguridad Nacional{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="hold-transition">
+    {% set is_auth_page = request.endpoint in ['login', 'registro', 'poblacion_login', 'poblacion_registro'] %}
+    {% if not is_auth_page %}
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <aside class="main-sidebar">
+            <section class="sidebar">
+                <!-- User Panel -->
+                {% if session.user_id %}
+                <div class="user-panel">
+                    <div class="image">
+                        <i class="bi bi-person-circle"></i>
+                    </div>
+                    <div class="info">
+                        <p>{{ session.user_name }}</p>
+                        <a href="{{ url_for('logout') }}"><i class="bi bi-circle-fill" style="color: #00a65a; font-size: 0.5rem;"></i> Online</a>
+                    </div>
+                </div>
+                {% endif %}
+                
+                <!-- Search Form -->
+                <form action="#" method="get" class="sidebar-form">
+                    <div class="input-group">
+                        <input type="text" name="q" class="form-control" placeholder="Buscar...">
+                        <span class="input-group-btn">
+                            <button type="submit" class="btn btn-flat" style="background: transparent; border: none; color: rgba(255,255,255,0.8); padding: 6px 12px;">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </span>
+                    </div>
+                </form>
+                
+                <!-- Sidebar Menu -->
+                <ul class="sidebar-menu">
+                    <li class="header">NAVEGACIÓN PRINCIPAL</li>
+                    <li {% if request.endpoint == 'alertas_publicas' %}class="active"{% endif %}>
+                        <a href="{{ url_for('alertas_publicas') }}">
+                            <i class="bi bi-globe"></i> <span>Alertas Públicas</span>
+                        </a>
+                    </li>
+                    {% if session.user_id %}
+                        {% if session.user_rol == 'admin' %}
+                        <!-- Menú para Administradores -->
+                        <li {% if request.endpoint == 'index' %}class="active"{% endif %}>
+                            <a href="{{ url_for('index') }}">
+                                <i class="bi bi-house-door"></i> <span>Inicio</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'dashboard' %}class="active"{% endif %}>
+                            <a href="{{ url_for('dashboard') }}">
+                                <i class="bi bi-speedometer2"></i> <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'analizar' %}class="active"{% endif %}>
+                            <a href="{{ url_for('analizar') }}">
+                                <i class="bi bi-camera"></i> <span>Análisis de Imágenes</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'alertas' %}class="active"{% endif %}>
+                            <a href="{{ url_for('alertas') }}">
+                                <i class="bi bi-bell"></i> <span>Alertas</span>
+                                {% if alertas_pendientes %}
+                                <span class="badge badge-danger pull-right">{{ alertas_pendientes }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'configurar_alertas' %}class="active"{% endif %}>
+                            <a href="{{ url_for('configurar_alertas') }}">
+                                <i class="bi bi-gear"></i> <span>Configuración</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'gestionar_usuarios' %}class="active"{% endif %}>
+                            <a href="{{ url_for('gestionar_usuarios') }}">
+                                <i class="bi bi-people"></i> <span>Gestionar Usuarios</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'admin_reportes' %}class="active"{% endif %}>
+                            <a href="{{ url_for('admin_reportes') }}">
+                                <i class="bi bi-file-earmark-text"></i> <span>Reportes de Usuarios</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'patrullas' %}class="active"{% endif %}>
+                            <a href="{{ url_for('patrullas') }}">
+                                <i class="bi bi-car-front"></i> <span>Patrullas</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'mapa_vigilancia' %}class="active"{% endif %}>
+                            <a href="{{ url_for('mapa_vigilancia') }}">
+                                <i class="bi bi-map"></i> <span>Mapa de Vigilancia</span>
+                            </a>
+                        </li>
+                        {% else %}
+                        <!-- Menú para Usuarios Normales -->
+                        <li {% if request.endpoint == 'usuario_alertas' %}class="active"{% endif %}>
+                            <a href="{{ url_for('usuario_alertas') }}">
+                                <i class="bi bi-exclamation-triangle"></i> <span>Alertas Graves</span>
+                            </a>
+                        </li>
+                        <li {% if request.endpoint == 'usuario_mapa' %}class="active"{% endif %}>
+                            <a href="{{ url_for('usuario_mapa') }}">
+                                <i class="bi bi-map"></i> <span>Mapa</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    <li class="header">USUARIO</li>
+                    <li {% if request.endpoint == 'perfil' %}class="active"{% endif %}>
+                        <a href="{{ url_for('perfil') }}">
+                            <i class="bi bi-person"></i> <span>Mi Perfil</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('logout') }}">
+                            <i class="bi bi-box-arrow-right"></i> <span>Cerrar Sesión</span>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li>
+                        <a href="{{ url_for('login') }}">
+                            <i class="bi bi-box-arrow-in-right"></i> <span>Iniciar Sesión</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ url_for('registro') }}">
+                            <i class="bi bi-person-plus"></i> <span>Registrarse</span>
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </section>
+        </aside>
+        
+        <!-- Content Wrapper -->
+        <div class="content-wrapper">
+            <!-- Header -->
+            <header class="main-header">
+                <nav class="navbar">
+                    <a href="{{ url_for('index') }}" class="navbar-brand">
+                        <b>VIGIA</b>
+                    </a>
+                    <ul class="navbar-nav">
+                        {% if session.user_id %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('alertas') }}" class="nav-link">
+                                <i class="bi bi-bell"></i>
+                                <span class="badge badge-warning navbar-badge">3</span>
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown user-menu">
+                            <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                                <span>{{ session.user_name }}</span>
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                                </a></li>
+                            </ul>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a href="{{ url_for('login') }}" class="nav-link">Iniciar Sesión</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </header>
+            
+            <!-- Content Header -->
+            <section class="content-header">
+                <h1>
+                    {% block page_title %}Dashboard{% endblock %}
+                    <small>{% block page_subtitle %}Panel de Control{% endblock %}</small>
+                </h1>
+                <ol class="breadcrumb">
+                    <li><a href="{{ url_for('index') }}"><i class="bi bi-house"></i> Home</a></li>
+                    {% block breadcrumb %}{% endblock %}
+                </ol>
+            </section>
+            
+            <!-- Main Content -->
+            <section class="content">
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }} alert-dismissible">
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+                
+                {% block content %}{% endblock %}
+            </section>
+        </div>
+    </div>
+    {% else %}
+    <!-- Login/Registro pages - sin sidebar ni header -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} alert-dismissible">
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

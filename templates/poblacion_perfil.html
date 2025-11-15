@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Vigia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .profile-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="profile-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="bi bi-person-circle"></i> Mi Perfil
+                    </h1>
+                    <p class="mb-0 mt-2">Sistema de Reportes Ciudadanos</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ url_for('poblacion_logout') }}" class="btn btn-light">
+                        <i class="bi bi-box-arrow-right"></i> Cerrar Sesión
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Estadísticas -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <div class="info-box bg-info">
+                    <span class="info-box-icon"><i class="bi bi-file-earmark-text"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Reportes</span>
+                        <span class="info-box-number">{{ total_reportes }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box bg-warning">
+                    <span class="info-box-icon"><i class="bi bi-clock-history"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Pendientes</span>
+                        <span class="info-box-number">{{ reportes_pendientes }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="info-box bg-success">
+                    <span class="info-box-icon"><i class="bi bi-check-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Resueltos</span>
+                        <span class="info-box-number">{{ total_reportes - reportes_pendientes }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del Usuario -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="bi bi-person"></i> Información Personal</h3>
+                    </div>
+                    <div class="box-body">
+                        <p><strong>Nombre:</strong> {{ usuario.nombre }}</p>
+                        <p><strong>Correo:</strong> {{ usuario.correo }}</p>
+                        {% if usuario.telefono %}
+                        <p><strong>Teléfono:</strong> {{ usuario.telefono }}</p>
+                        {% endif %}
+                        <p><strong>Fecha de Registro:</strong> {{ usuario.fecha_registro.split('T')[0] if 'T' in usuario.fecha_registro else usuario.fecha_registro }}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="bi bi-lightning-charge"></i> Acciones Rápidas</h3>
+                    </div>
+                    <div class="box-body">
+                        <a href="{{ url_for('poblacion_reportar') }}" class="btn btn-primary btn-lg w-100 mb-2">
+                            <i class="bi bi-camera-fill"></i> Hacer un Reporte
+                        </a>
+                        <a href="{{ url_for('alertas_publicas') }}" class="btn btn-outline-info w-100">
+                            <i class="bi bi-exclamation-triangle"></i> Ver Alertas Públicas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mis Reportes -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title"><i class="bi bi-list-ul"></i> Mis Reportes</h3>
+                    </div>
+                    <div class="box-body">
+                        {% if reportes %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Imagen</th>
+                                        <th>Fecha/Hora</th>
+                                        <th>Descripción</th>
+                                        <th>Ubicación</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for reporte in reportes %}
+                                    <tr>
+                                        <td>
+                                            <img src="{{ url_for('poblacion_imagen', filename=reporte.imagen) }}" 
+                                                 alt="Reporte" 
+                                                 style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                                        </td>
+                                        <td>
+                                            {{ reporte.fecha_hora.split('T')[0] if 'T' in reporte.fecha_hora else reporte.fecha_hora.split(' ')[0] }}<br>
+                                            <small>{{ reporte.fecha_hora.split('T')[1].split('.')[0] if 'T' in reporte.fecha_hora else (reporte.fecha_hora.split(' ')[1] if ' ' in reporte.fecha_hora else '') }}</small>
+                                        </td>
+                                        <td>{{ reporte.descripcion or 'Sin descripción' }}</td>
+                                        <td>{{ reporte.ubicacion or 'No especificada' }}</td>
+                                        <td>
+                                            <span class="badge bg-secondary">{{ reporte.tipo_reporte }}</span>
+                                        </td>
+                                        <td>
+                                            {% if reporte.estado == 'pendiente' %}
+                                                <span class="badge bg-warning">Pendiente</span>
+                                            {% elif reporte.estado == 'en_revision' %}
+                                                <span class="badge bg-info">En Revisión</span>
+                                            {% elif reporte.estado == 'resuelto' %}
+                                                <span class="badge bg-success">Resuelto</span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">{{ reporte.estado }}</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% else %}
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> 
+                            Aún no has realizado ningún reporte. 
+                            <a href="{{ url_for('poblacion_reportar') }}">Haz tu primer reporte aquí</a>.
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

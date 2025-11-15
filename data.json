@@ -1,0 +1,81 @@
+{
+  "estadisticas": {
+    "total_alertas": 45,
+    "total_armas": 18,
+    "total_incendios": 12,
+    "total_vehiculos": 15,
+    "alertas_24h": 8,
+    "alertas_criticas_24h": 5
+  },
+  "alertas_recientes": [
+    {
+      "id": 45,
+      "fecha_hora": "2024-11-15T14:30:00",
+      "tipo": "arma",
+      "objeto": "knife",
+      "confianza": 0.92
+    },
+    {
+      "id": 44,
+      "fecha_hora": "2024-11-15T13:15:00",
+      "tipo": "incendio",
+      "objeto": "fire",
+      "confianza": 0.88
+    },
+    {
+      "id": 43,
+      "fecha_hora": "2024-11-15T12:00:00",
+      "tipo": "vehiculo",
+      "objeto": "truck",
+      "confianza": 0.75
+    }
+  ],
+  "alertas_por_dia": [
+    {"fecha": "2024-11-09", "cantidad": 5},
+    {"fecha": "2024-11-10", "cantidad": 8},
+    {"fecha": "2024-11-11", "cantidad": 6},
+    {"fecha": "2024-11-12", "cantidad": 10},
+    {"fecha": "2024-11-13", "cantidad": 7},
+    {"fecha": "2024-11-14", "cantidad": 9},
+    {"fecha": "2024-11-15", "cantidad": 8}
+  ],
+  "alertas": [
+    {
+      "id": 45,
+      "fecha_hora": "2024-11-15T14:30:00",
+      "tipo": "arma",
+      "objeto": "knife",
+      "confianza": 0.92,
+      "x1": 0.25,
+      "y1": 0.30,
+      "x2": 0.45,
+      "y2": 0.60,
+      "imagen": "uploads/20241115_143000_prueba.jpg"
+    },
+    {
+      "id": 44,
+      "fecha_hora": "2024-11-15T13:15:00",
+      "tipo": "incendio",
+      "objeto": "fire",
+      "confianza": 0.88,
+      "x1": null,
+      "y1": null,
+      "x2": null,
+      "y2": null,
+      "imagen": "uploads/20241115_131500_incendio.jpg"
+    },
+    {
+      "id": 43,
+      "fecha_hora": "2024-11-15T12:00:00",
+      "tipo": "vehiculo",
+      "objeto": "truck",
+      "confianza": 0.75,
+      "x1": 0.10,
+      "y1": 0.20,
+      "x2": 0.80,
+      "y2": 0.90,
+      "imagen": "uploads/20241115_120000_vehiculo.jpg"
+    }
+  ]
+}
+

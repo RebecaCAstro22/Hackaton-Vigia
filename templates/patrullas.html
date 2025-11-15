@@ -1,0 +1,202 @@
+{% extends "base.html" %}
+
+{% block title %}Patrullas - Vigia{% endblock %}
+
+{% block page_title %}Panel de Patrullas{% endblock %}
+{% block page_subtitle %}Monitoreo de Patrullas en El Salvador{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Patrullas</li>
+{% endblock %}
+
+{% block content %}
+<!-- Info Boxes -->
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="bi bi-car-front"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Patrullas</span>
+                <span class="info-box-number">{{ total_patrullas }}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 100%"></div>
+                </div>
+                <span class="progress-description">Patrullas registradas</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-green"><i class="bi bi-check-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Patrullas Activas</span>
+                <span class="info-box-number">{{ patrullas_activas }}</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" style="width: {% if total_patrullas > 0 %}{{ (patrullas_activas / total_patrullas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">En servicio regular</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-yellow"><i class="bi bi-clock"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Disponibles</span>
+                <span class="info-box-number">{{ patrullas_disponibles }}</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning" style="width: {% if total_patrullas > 0 %}{{ (patrullas_disponibles / total_patrullas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Listas para asignación</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="bi bi-arrow-right-circle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">En Ruta</span>
+                <span class="info-box-number">{{ patrullas_en_ruta }}</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger" style="width: {% if total_patrullas > 0 %}{{ (patrullas_en_ruta / total_patrullas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Respondiendo a incidentes</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Patrullas por Departamento -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-map"></i> Patrullas por Departamento</h3>
+            </div>
+            <div class="box-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Departamento</th>
+                                <th>Cantidad</th>
+                                <th>Porcentaje</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dept in patrullas_por_departamento %}
+                            <tr>
+                                <td><strong>{{ dept.departamento }}</strong></td>
+                                <td><span class="badge badge-primary">{{ dept.cantidad }}</span></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" style="width: {% if total_patrullas > 0 %}{{ (dept.cantidad / total_patrullas * 100) }}{% else %}0{% endif %}%">
+                                            {% if total_patrullas > 0 %}{{ "%.1f"|format(dept.cantidad / total_patrullas * 100) }}{% else %}0{% endif %}%
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-info-circle"></i> Información del Sistema</h3>
+            </div>
+            <div class="box-body">
+                <p><strong>Sistema de Monitoreo de Patrullas</strong></p>
+                <p class="text-muted">
+                    Este panel muestra el estado en tiempo real de las patrullas de la Policía Nacional Civil 
+                    desplegadas en todo El Salvador.
+                </p>
+                <hr>
+                <p><strong>Estados de Patrullas:</strong></p>
+                <ul>
+                    <li><span class="badge badge-success">Activa</span> - En servicio regular</li>
+                    <li><span class="badge badge-warning">Disponible</span> - Lista para asignación</li>
+                    <li><span class="badge badge-danger">En Ruta</span> - Respondiendo a incidente</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Patrullas -->
+<div class="row">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-list-ul"></i> Lista de Patrullas</h3>
+            </div>
+            <div class="box-body">
+                {% if patrullas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Número</th>
+                                <th>Tipo</th>
+                                <th>Zona</th>
+                                <th>Municipio</th>
+                                <th>Departamento</th>
+                                <th>Estado</th>
+                                <th>Oficial Encargado</th>
+                                <th>Teléfono</th>
+                                <th>Última Actualización</th>
+                                <th>Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for patrulla in patrullas %}
+                            <tr>
+                                <td><strong>{{ patrulla.numero_patrulla }}</strong></td>
+                                <td>{{ patrulla.tipo }}</td>
+                                <td><i class="bi bi-geo-alt"></i> {{ patrulla.zona }}</td>
+                                <td>{{ patrulla.municipio }}</td>
+                                <td><strong>{{ patrulla.departamento }}</strong></td>
+                                <td>
+                                    {% if patrulla.estado == 'activa' %}
+                                        <span class="badge badge-success">Activa</span>
+                                    {% elif patrulla.estado == 'disponible' %}
+                                        <span class="badge badge-warning">Disponible</span>
+                                    {% elif patrulla.estado == 'en_ruta' %}
+                                        <span class="badge badge-danger">En Ruta</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">{{ patrulla.estado }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ patrulla.oficial_encargado or 'N/A' }}</td>
+                                <td>{{ patrulla.telefono or 'N/A' }}</td>
+                                <td>
+                                    {% if patrulla.ultima_actualizacion %}
+                                        {% set fecha = patrulla.ultima_actualizacion.split('T')[0] if 'T' in patrulla.ultima_actualizacion else patrulla.ultima_actualizacion.split(' ')[0] %}
+                                        {% set hora = patrulla.ultima_actualizacion.split('T')[1] if 'T' in patrulla.ultima_actualizacion else patrulla.ultima_actualizacion.split(' ')[1] if ' ' in patrulla.ultima_actualizacion else '' %}
+                                        <small>{{ fecha }}<br>{{ hora.split('.')[0] if '.' in hora else hora }}</small>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td><small class="text-muted">{{ patrulla.observaciones or 'Sin observaciones' }}</small></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No hay patrullas registradas</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

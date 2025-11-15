@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ojo de Dios - Seguridad Nacional</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-eye-fill"></i> Ojo de Dios
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="index.html">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="analizar.html">
+                            <i class="bi bi-camera"></i> Analizar Imagen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="alertas.html">
+                            <i class="bi bi-bell"></i> Alertas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="hero-section text-center py-5 mb-5">
+                    <h1 class="display-4 fw-bold mb-3">
+                        <i class="bi bi-eye-fill text-primary"></i> Ojo de Dios
+                    </h1>
+                    <p class="lead text-muted">
+                        Sistema Inteligente de Detección de Amenazas para Seguridad Nacional
+                    </p>
+                    <p class="text-muted">
+                        Detecta armas, incendios y vehículos sospechosos usando Inteligencia Artificial
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-camera-fill text-primary" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Analizar Imagen</h5>
+                        <p class="card-text text-muted">
+                            Sube una imagen para analizar y detectar amenazas en tiempo real
+                        </p>
+                        <a href="analizar.html" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Analizar Ahora
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-speedometer2 text-success" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Dashboard</h5>
+                        <p class="card-text text-muted">
+                            Visualiza estadísticas y alertas en tiempo real del sistema
+                        </p>
+                        <a href="dashboard.html" class="btn btn-success">
+                            <i class="bi bi-graph-up"></i> Ver Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="mb-3">
+                            <i class="bi bi-bell-fill text-warning" style="font-size: 3rem;"></i>
+                        </div>
+                        <h5 class="card-title">Alertas</h5>
+                        <p class="card-text text-muted">
+                            Revisa todas las alertas registradas y su historial completo
+                        </p>
+                        <a href="alertas.html" class="btn btn-warning">
+                            <i class="bi bi-list-ul"></i> Ver Alertas
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-info-circle"></i> Características del Sistema</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-check-circle text-success"></i> Detección de Armas</h6>
+                                <p class="text-muted">Identifica pistolas, cuchillos, rifles y otros objetos peligrosos</p>
+                                
+                                <h6><i class="bi bi-check-circle text-success"></i> Detección de Incendios</h6>
+                                <p class="text-muted">Reconoce fuego, llamas, humo y otros signos de incendio</p>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="bi bi-check-circle text-success"></i> Vehículos Sospechosos</h6>
+                                <p class="text-muted">Detecta vehículos que pueden representar una amenaza</p>
+                                
+                                <h6><i class="bi bi-check-circle text-success"></i> Análisis en Tiempo Real</h6>
+                                <p class="text-muted">Procesamiento rápido con Google Cloud Vision AI</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">
+                <i class="bi bi-shield-check"></i> 
+                Sistema de Detección de Amenazas - Seguridad Nacional
+            </p>
+            <small class="text-muted">Powered by Google Cloud Vision AI</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

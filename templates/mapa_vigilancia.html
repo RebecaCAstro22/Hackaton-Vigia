@@ -1,0 +1,304 @@
+{% extends "base.html" %}
+
+{% block title %}Mapa de Vigilancia - Vigia{% endblock %}
+
+{% block page_title %}Mapa de Vigilancia{% endblock %}
+{% block page_subtitle %}Zonas con Menor Cobertura de Patrullas{% endblock %}
+
+{% block breadcrumb %}
+<li><a href="{{ url_for('patrullas') }}">Patrullas</a></li>
+<li class="active">Mapa de Vigilancia</li>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+    #map {
+        height: 600px;
+        width: 100%;
+        border-radius: 4px;
+    }
+    .legend {
+        background: white;
+        padding: 10px;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .legend-item {
+        margin: 5px 0;
+    }
+    .zona-riesgo-alto {
+        color: #dc3545;
+        font-weight: bold;
+    }
+    .zona-riesgo-medio {
+        color: #ffc107;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="info-box bg-danger">
+            <span class="info-box-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Zonas con Baja Vigilancia</span>
+                <span class="info-box-number">{{ zonas_baja_vigilancia|length }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box bg-info">
+            <span class="info-box-icon"><i class="bi bi-map"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total de Zonas</span>
+                <span class="info-box-number">{{ total_zonas }}</span>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="info-box bg-success">
+            <span class="info-box-icon"><i class="bi bi-car-front"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Patrullas en Mapa</span>
+                <span class="info-box-number">{{ todas_patrullas|length }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Mapa -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-map"></i> Mapa de Cobertura de Vigilancia
+                </h3>
+                <div class="box-tools pull-right">
+                    <button type="button" class="btn btn-sm btn-info" onclick="centrarElSalvador()">
+                        <i class="bi bi-geo-alt"></i> Centrar en El Salvador
+                    </button>
+                </div>
+            </div>
+            <div class="box-body">
+                <div id="map"></div>
+                <div class="legend mt-3">
+                    <h5><i class="bi bi-info-circle"></i> Leyenda:</h5>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #dc3545;"></i> 
+                        <strong>Zona de Alto Riesgo</strong> - Sin patrullas activas
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #ffc107;"></i> 
+                        <strong>Zona de Riesgo Medio</strong> - Menos de 2 patrullas activas
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #28a745;"></i> 
+                        <strong>Patrulla Activa</strong> - En servicio
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #17a2b8;"></i> 
+                        <strong>Patrulla Disponible</strong> - Lista para asignación
+                    </div>
+                    <div class="legend-item">
+                        <i class="bi bi-circle-fill" style="color: #6c757d;"></i> 
+                        <strong>Patrulla en Ruta</strong> - Respondiendo a incidente
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Zonas con Baja Vigilancia -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-exclamation-triangle"></i> Zonas que Requieren Mayor Vigilancia
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if zonas_baja_vigilancia %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Zona</th>
+                                <th>Municipio</th>
+                                <th>Departamento</th>
+                                <th>Total Patrullas</th>
+                                <th>Patrullas Activas</th>
+                                <th>Patrullas Disponibles</th>
+                                <th>Nivel de Riesgo</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for zona in zonas_baja_vigilancia %}
+                            <tr>
+                                <td><strong>{{ zona.zona }}</strong></td>
+                                <td>{{ zona.municipio }}</td>
+                                <td>{{ zona.departamento }}</td>
+                                <td>{{ zona.total_patrullas }}</td>
+                                <td>
+                                    {% if zona.patrullas_activas == 0 %}
+                                        <span class="badge badge-danger">0</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">{{ zona.patrullas_activas }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if zona.patrullas_disponibles > 0 %}
+                                        <span class="badge badge-info">{{ zona.patrullas_disponibles }}</span>
+                                    {% else %}
+                                        <span class="badge badge-secondary">0</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if zona.nivel_riesgo == 'alto' %}
+                                        <span class="badge badge-danger zona-riesgo-alto">ALTO</span>
+                                    {% else %}
+                                        <span class="badge badge-warning zona-riesgo-medio">MEDIO</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="centrarEnZona({{ zona.latitud }}, {{ zona.longitud }}, '{{ zona.zona }}')">
+                                        <i class="bi bi-geo-alt"></i> Ver en Mapa
+                                    </button>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-success">
+                    <i class="bi bi-check-circle"></i> 
+                    <strong>Excelente cobertura:</strong> Todas las zonas tienen al menos 2 patrullas activas.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+    // Inicializar mapa centrado en El Salvador
+    var map = L.map('map').setView([13.7942, -88.8965], 8);
+    
+    // Agregar capa de OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+    }).addTo(map);
+    
+    // Iconos personalizados
+    var iconRiesgoAlto = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#dc3545;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 5px rgba(0,0,0,0.5);'></div>",
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    
+    var iconRiesgoMedio = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#ffc107;width:20px;height:20px;border-radius:50%;border:3px solid white;box-shadow:0 0 5px rgba(0,0,0,0.5);'></div>",
+        iconSize: [20, 20],
+        iconAnchor: [10, 10]
+    });
+    
+    var iconPatrullaActiva = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#28a745;width:15px;height:15px;border-radius:50%;border:2px solid white;box-shadow:0 0 3px rgba(0,0,0,0.5);'></div>",
+        iconSize: [15, 15],
+        iconAnchor: [7, 7]
+    });
+    
+    var iconPatrullaDisponible = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#17a2b8;width:15px;height:15px;border-radius:50%;border:2px solid white;box-shadow:0 0 3px rgba(0,0,0,0.5);'></div>",
+        iconSize: [15, 15],
+        iconAnchor: [7, 7]
+    });
+    
+    var iconPatrullaEnRuta = L.divIcon({
+        className: 'custom-div-icon',
+        html: "<div style='background-color:#6c757d;width:15px;height:15px;border-radius:50%;border:2px solid white;box-shadow:0 0 3px rgba(0,0,0,0.5);'></div>",
+        iconSize: [15, 15],
+        iconAnchor: [7, 7]
+    });
+    
+    // Agregar marcadores de zonas con baja vigilancia
+    var zonasBajaVigilancia = {{ zonas_baja_vigilancia|tojson }};
+    zonasBajaVigilancia.forEach(function(zona) {
+        var icono = zona.nivel_riesgo === 'alto' ? iconRiesgoAlto : iconRiesgoMedio;
+        var popup = `
+            <strong>${zona.zona}</strong><br>
+            ${zona.municipio}, ${zona.departamento}<br>
+            <hr>
+            <strong>Patrullas:</strong><br>
+            Total: ${zona.total_patrullas}<br>
+            Activas: ${zona.patrullas_activas}<br>
+            Disponibles: ${zona.patrullas_disponibles}<br>
+            En Ruta: ${zona.patrullas_en_ruta}<br>
+            <hr>
+            <span class="badge badge-${zona.nivel_riesgo === 'alto' ? 'danger' : 'warning'}">
+                Riesgo ${zona.nivel_riesgo.toUpperCase()}
+            </span>
+        `;
+        L.marker([zona.latitud, zona.longitud], {icon: icono})
+            .addTo(map)
+            .bindPopup(popup);
+    });
+    
+    // Agregar marcadores de patrullas
+    var todasPatrullas = {{ todas_patrullas|tojson }};
+    todasPatrullas.forEach(function(patrulla) {
+        var icono;
+        if (patrulla.estado === 'activa') {
+            icono = iconPatrullaActiva;
+        } else if (patrulla.estado === 'disponible') {
+            icono = iconPatrullaDisponible;
+        } else {
+            icono = iconPatrullaEnRuta;
+        }
+        
+        var popup = `
+            <strong>${patrulla.numero_patrulla}</strong><br>
+            ${patrulla.zona}<br>
+            ${patrulla.municipio}, ${patrulla.departamento}<br>
+            <hr>
+            <strong>Estado:</strong> ${patrulla.estado}<br>
+            ${patrulla.oficial_encargado ? '<strong>Oficial:</strong> ' + patrulla.oficial_encargado + '<br>' : ''}
+        `;
+        L.marker([patrulla.latitud, patrulla.longitud], {icon: icono})
+            .addTo(map)
+            .bindPopup(popup);
+    });
+    
+    // Función para centrar en El Salvador
+    function centrarElSalvador() {
+        map.setView([13.7942, -88.8965], 8);
+    }
+    
+    // Función para centrar en una zona específica
+    function centrarEnZona(lat, lon, nombreZona) {
+        map.setView([lat, lon], 12);
+        setTimeout(function() {
+            map.openPopup();
+        }, 500);
+    }
+</script>
+{% endblock %}
+

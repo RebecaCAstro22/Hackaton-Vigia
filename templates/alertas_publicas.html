@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas Públicas - Vigia</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>
+        .public-header {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+        }
+        .alert-card {
+            border-left: 4px solid;
+            margin-bottom: 1rem;
+            transition: transform 0.2s;
+        }
+        .alert-card:hover {
+            transform: translateX(5px);
+        }
+        .alert-card.arma { border-left-color: #dc3545; }
+        .alert-card.incendio { border-left-color: #fd7e14; }
+        .alert-card.agresion { border-left-color: #6f42c1; }
+        .alert-card.vehiculo { border-left-color: #ffc107; }
+        .badge-critica { background-color: #dc3545; }
+        .badge-intermedia { background-color: #ffc107; color: #000; }
+        .badge-baja { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <!-- Header Público -->
+    <div class="public-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h1 class="mb-0">
+                        <i class="bi bi-shield-check"></i> Vigia - Alertas Públicas
+                    </h1>
+                    <p class="mb-0 mt-2">Sistema de Seguridad Nacional de El Salvador</p>
+                </div>
+                <div class="col-md-4 text-end">
+                    <a href="{{ url_for('login') }}" class="btn btn-light">
+                        <i class="bi bi-box-arrow-in-right"></i> Acceso Autorizado
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Estadísticas Rápidas -->
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">
+                            <i class="bi bi-exclamation-triangle-fill text-danger"></i> 
+                            Alertas Graves (Últimas 24 horas)
+                        </h3>
+                    </div>
+                    <div class="box-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="info-box bg-danger">
+                                    <span class="info-box-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+                                    <div class="info-box-content">
+                                        <span class="info-box-text">Alertas Graves</span>
+                                        <span class="info-box-number">{{ total_criticas }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="alert alert-warning mb-0">
+                                    <i class="bi bi-info-circle"></i>
+                                    <strong>Información Pública:</strong> Esta página muestra únicamente 
+                                    <strong>alertas muy graves</strong> (confianza ≥ 80%) con ubicación verificada, 
+                                    detectadas en las últimas 24 horas. 
+                                    <br><small>Para información detallada y gestión del sistema, 
+                                    <a href="{{ url_for('login') }}">acceso autorizado requerido</a>.</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Alertas -->
+        <div class="row">
+            <div class="col-md-12">
+                <div class="box">
+                    <div class="box-header">
+                        <h3 class="box-title">
+                            <i class="bi bi-list-ul"></i> Alertas Recientes
+                        </h3>
+                    </div>
+                    <div class="box-body">
+                        {% if alertas %}
+                            <div id="alertas-container">
+                                {% for alerta in alertas %}
+                                    <div class="alert-card {{ alerta.tipo }} card mb-3">
+                                        <div class="card-body">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-2 text-center">
+                                                    {% if alerta.tipo == 'arma' %}
+                                                        <i class="bi bi-shield-exclamation text-danger" style="font-size: 2.5rem;"></i>
+                                                        <div class="mt-2"><strong>ARMA</strong></div>
+                                                    {% elif alerta.tipo == 'incendio' %}
+                                                        <i class="bi bi-fire text-warning" style="font-size: 2.5rem;"></i>
+                                                        <div class="mt-2"><strong>INCENDIO</strong></div>
+                                                    {% elif alerta.tipo == 'agresion' %}
+                                                        <i class="bi bi-person-x-fill text-purple" style="font-size: 2.5rem;"></i>
+                                                        <div class="mt-2"><strong>AGRESIÓN</strong></div>
+                                                    {% elif alerta.tipo == 'vehiculo' %}
+                                                        <i class="bi bi-car-front text-warning" style="font-size: 2.5rem;"></i>
+                                                        <div class="mt-2"><strong>VEHÍCULO</strong></div>
+                                                    {% else %}
+                                                        <i class="bi bi-exclamation-circle" style="font-size: 2.5rem;"></i>
+                                                        <div class="mt-2"><strong>ALERTA</strong></div>
+                                                    {% endif %}
+                                                </div>
+                                                <div class="col-md-7">
+                                                    <h5 class="mb-2">
+                                                        <i class="bi bi-geo-alt-fill text-primary"></i> 
+                                                        <strong>Ubicación:</strong> {{ alerta.ubicacion }}
+                                                    </h5>
+                                                    <p class="text-muted mb-0">
+                                                        <i class="bi bi-calendar3"></i> 
+                                                        {{ alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0] }}
+                                                        <span class="ms-3">
+                                                            <i class="bi bi-clock"></i> 
+                                                            {{ alerta.fecha_hora.split('T')[1].split('.')[0] if 'T' in alerta.fecha_hora else (alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else 'N/A') }}
+                                                        </span>
+                                                    </p>
+                                                </div>
+                                                <div class="col-md-3 text-end">
+                                                    <span class="badge bg-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                                        ALERTA GRAVE
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-success">
+                                <i class="bi bi-check-circle"></i> 
+                                <strong>No hay alertas graves activas en las últimas 24 horas.</strong>
+                                <br><small>La situación está bajo control.</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Público -->
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="text-center text-muted">
+                    <p>
+                        <i class="bi bi-shield-lock"></i> 
+                        Sistema de Seguridad Nacional - El Salvador<br>
+                        <small>Última actualización: <span id="fecha-actual"></span></small>
+                    </p>
+                    <p>
+                        <a href="{{ url_for('poblacion_login') }}" class="btn btn-sm btn-primary me-2">
+                            <i class="bi bi-people"></i> Acceso para Ciudadanos
+                        </a>
+                        <a href="{{ url_for('login') }}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-shield-lock"></i> Acceso para Personal Autorizado
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Mostrar fecha actual
+        const ahora = new Date();
+        const fechaStr = ahora.toLocaleDateString('es-SV', { 
+            day: '2-digit', 
+            month: '2-digit', 
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+        document.getElementById('fecha-actual').textContent = fechaStr;
+        
+        // Auto-refresh cada 30 segundos
+        setTimeout(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
+

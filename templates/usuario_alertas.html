@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Alertas Graves - Vigia{% endblock %}
+
+{% block page_title %}Alertas Graves{% endblock %}
+{% block page_subtitle %}Solo Alertas Críticas con Ubicación{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Alertas Graves</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="info-box bg-danger">
+            <span class="info-box-icon"><i class="bi bi-exclamation-triangle-fill"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Alertas Graves Activas (Últimas 24 horas)</span>
+                <span class="info-box-number">{{ total_criticas }}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 100%"></div>
+                </div>
+                <span class="progress-description">Confianza ≥ 80% con ubicación verificada</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Alertas -->
+<div class="row">
+    <div class="col-md-12">
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-list-ul"></i> Alertas Graves
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if alertas %}
+                    <div id="alertas-container">
+                        {% for alerta in alertas %}
+                            <div class="alert-card {{ alerta.tipo }} card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 text-center">
+                                            {% if alerta.tipo == 'arma' %}
+                                                <i class="bi bi-shield-exclamation text-danger" style="font-size: 2.5rem;"></i>
+                                                <div class="mt-2"><strong>ARMA</strong></div>
+                                            {% elif alerta.tipo == 'incendio' %}
+                                                <i class="bi bi-fire text-warning" style="font-size: 2.5rem;"></i>
+                                                <div class="mt-2"><strong>INCENDIO</strong></div>
+                                            {% elif alerta.tipo == 'agresion' %}
+                                                <i class="bi bi-person-x-fill text-purple" style="font-size: 2.5rem;"></i>
+                                                <div class="mt-2"><strong>AGRESIÓN</strong></div>
+                                            {% elif alerta.tipo == 'vehiculo' %}
+                                                <i class="bi bi-car-front text-warning" style="font-size: 2.5rem;"></i>
+                                                <div class="mt-2"><strong>VEHÍCULO</strong></div>
+                                            {% else %}
+                                                <i class="bi bi-exclamation-circle" style="font-size: 2.5rem;"></i>
+                                                <div class="mt-2"><strong>ALERTA</strong></div>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-7">
+                                            <h5 class="mb-2">
+                                                <i class="bi bi-geo-alt-fill text-primary"></i> 
+                                                <strong>Ubicación:</strong> {{ alerta.ubicacion }}
+                                            </h5>
+                                            <p class="text-muted mb-0">
+                                                <i class="bi bi-calendar3"></i> 
+                                                {{ alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0] }}
+                                                <span class="ms-3">
+                                                    <i class="bi bi-clock"></i> 
+                                                    {{ alerta.fecha_hora.split('T')[1].split('.')[0] if 'T' in alerta.fecha_hora else (alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else 'N/A') }}
+                                                </span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <span class="badge bg-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">
+                                                ALERTA GRAVE
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-success">
+                        <i class="bi bi-check-circle"></i> 
+                        <strong>No hay alertas graves activas en las últimas 24 horas.</strong>
+                        <br><small>La situación está bajo control.</small>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+

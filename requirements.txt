@@ -1,0 +1,7 @@
+Flask
+google-cloud-vision
+Pillow
+Jinja2
+opencv-python
+numpy
+waitress

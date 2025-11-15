@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Ojo de Dios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-eye-fill"></i> Ojo de Dios
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="analizar.html">
+                            <i class="bi bi-camera"></i> Analizar Imagen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="alertas.html">
+                            <i class="bi bi-bell"></i> Alertas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="bi bi-speedometer2"></i> Dashboard de Seguridad
+                </h2>
+            </div>
+        </div>
+
+        <!-- Tarjetas de Estadísticas -->
+        <div class="row g-4 mb-4" id="estadisticasCards">
+            <!-- Se cargarán dinámicamente -->
+        </div>
+
+        <!-- Alertas Últimas 24 Horas -->
+        <div class="row g-4 mb-4">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-clock-history"></i> Últimas 24 Horas</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center" id="ultimas24h">
+                            <!-- Se cargará dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-graph-up"></i> Gráfico de Alertas (7 días)</h5>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="chartAlertas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alertas Recientes -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="bi bi-list-ul"></i> Alertas Recientes</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha/Hora</th>
+                                        <th>Tipo</th>
+                                        <th>Objeto</th>
+                                        <th>Confianza</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAlertas">
+                                    <!-- Se cargará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">
+                <i class="bi bi-shield-check"></i> 
+                Sistema de Detección de Amenazas - Seguridad Nacional
+            </p>
+            <small class="text-muted">Powered by Google Cloud Vision AI</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Cargar datos
+        fetch('data.json')
+            .then(response => response.json())
+            .then(data => {
+                cargarEstadisticas(data.estadisticas);
+                cargarUltimas24h(data.estadisticas);
+                cargarGrafico(data.alertas_por_dia);
+                cargarTablaAlertas(data.alertas_recientes);
+            })
+            .catch(error => {
+                console.error('Error cargando datos:', error);
+                // Usar datos de ejemplo si no se puede cargar el JSON
+                cargarDatosEjemplo();
+            });
+
+        function cargarEstadisticas(stats) {
+            const cards = `
+                <div class="col-md-3">
+                    <div class="card text-white bg-primary shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2">Total Alertas</h6>
+                                    <h2 class="mb-0">${stats.total_alertas}</h2>
+                                </div>
+                                <i class="bi bi-bell-fill" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-danger shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2">Armas Detectadas</h6>
+                                    <h2 class="mb-0">${stats.total_armas}</h2>
+                                </div>
+                                <i class="bi bi-shield-exclamation" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-warning shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2">Incendios Detectados</h6>
+                                    <h2 class="mb-0">${stats.total_incendios}</h2>
+                                </div>
+                                <i class="bi bi-fire" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card text-white bg-info shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-subtitle mb-2">Vehículos Sospechosos</h6>
+                                    <h2 class="mb-0">${stats.total_vehiculos}</h2>
+                                </div>
+                                <i class="bi bi-car-front" style="font-size: 3rem; opacity: 0.3;"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('estadisticasCards').innerHTML = cards;
+        }
+
+        function cargarUltimas24h(stats) {
+            const html = `
+                <div class="col-6">
+                    <h3 class="text-primary">${stats.alertas_24h}</h3>
+                    <p class="text-muted mb-0">Total Alertas</p>
+                </div>
+                <div class="col-6">
+                    <h3 class="text-danger">${stats.alertas_criticas_24h}</h3>
+                    <p class="text-muted mb-0">Alertas Críticas</p>
+                </div>
+            `;
+            document.getElementById('ultimas24h').innerHTML = html;
+        }
+
+        function cargarGrafico(datos) {
+            const ctx = document.getElementById('chartAlertas').getContext('2d');
+            const fechas = datos.map(item => item.fecha);
+            const cantidades = datos.map(item => item.cantidad);
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: fechas,
+                    datasets: [{
+                        label: 'Alertas',
+                        data: cantidades,
+                        borderColor: 'rgb(75, 192, 192)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        function cargarTablaAlertas(alertas) {
+            let html = '';
+            alertas.forEach(alerta => {
+                const tipoBadge = {
+                    'arma': '<span class="badge bg-danger">🔫 Arma</span>',
+                    'incendio': '<span class="badge bg-warning">🔥 Incendio</span>',
+                    'vehiculo': '<span class="badge bg-info">🚗 Vehículo</span>'
+                };
+                
+                html += `
+                    <tr>
+                        <td>#${alerta.id}</td>
+                        <td>${alerta.fecha_hora}</td>
+                        <td>${tipoBadge[alerta.tipo] || '<span class="badge bg-secondary">' + alerta.tipo + '</span>'}</td>
+                        <td>${alerta.objeto}</td>
+                        <td>
+                            <div class="progress" style="height: 20px;">
+                                <div class="progress-bar" role="progressbar" 
+                                     style="width: ${(alerta.confianza * 100)}%">
+                                    ${(alerta.confianza * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" disabled>
+                                <i class="bi bi-image"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            document.getElementById('tablaAlertas').innerHTML = html || '<tr><td colspan="6" class="text-center text-muted">No hay alertas recientes</td></tr>';
+        }
+
+        function cargarDatosEjemplo() {
+            const datosEjemplo = {
+                estadisticas: {
+                    total_alertas: 45,
+                    total_armas: 18,
+                    total_incendios: 12,
+                    total_vehiculos: 15,
+                    alertas_24h: 8,
+                    alertas_criticas_24h: 5
+                },
+                alertas_recientes: [
+                    {id: 45, fecha_hora: "2024-11-15T14:30:00", tipo: "arma", objeto: "knife", confianza: 0.92},
+                    {id: 44, fecha_hora: "2024-11-15T13:15:00", tipo: "incendio", objeto: "fire", confianza: 0.88},
+                    {id: 43, fecha_hora: "2024-11-15T12:00:00", tipo: "vehiculo", objeto: "truck", confianza: 0.75}
+                ],
+                alertas_por_dia: [
+                    {fecha: "2024-11-09", cantidad: 5},
+                    {fecha: "2024-11-10", cantidad: 8},
+                    {fecha: "2024-11-11", cantidad: 6},
+                    {fecha: "2024-11-12", cantidad: 10},
+                    {fecha: "2024-11-13", cantidad: 7},
+                    {fecha: "2024-11-14", cantidad: 9},
+                    {fecha: "2024-11-15", cantidad: 8}
+                ]
+            };
+            cargarEstadisticas(datosEjemplo.estadisticas);
+            cargarUltimas24h(datosEjemplo.estadisticas);
+            cargarGrafico(datosEjemplo.alertas_por_dia);
+            cargarTablaAlertas(datosEjemplo.alertas_recientes);
+        }
+    </script>
+</body>
+</html>
+

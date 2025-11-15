@@ -1,0 +1,192 @@
+{% extends "base.html" %}
+
+{% block title %}Iniciar Sesión - Vigia{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 100vh !important;
+        flex-direction: column !important;
+    }
+    
+    main {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 100% !important;
+        flex: 1 !important;
+        padding: 0 !important;
+    }
+    
+    .login-container {
+        width: 100%;
+        max-width: 450px;
+        padding: 2rem;
+        margin: 0 auto;
+    }
+    
+    .logo-login {
+        width: 100px;
+        height: 100px;
+        background: var(--primary-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    .logo-login i {
+        color: var(--text-light);
+        font-size: 3rem;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2.5rem;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+    
+    .login-title {
+        color: var(--text-light);
+        text-align: center;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .form-label {
+        color: #333;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+    
+    .input-group-icon {
+        position: relative;
+    }
+    
+    .input-group-icon i {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--accent-purple);
+        z-index: 10;
+    }
+    
+    .input-group-icon input {
+        padding-left: 45px;
+    }
+    
+    .btn-login {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-light) 100%);
+        border: none;
+        color: white;
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        width: 100%;
+        box-shadow: 0 4px 15px rgba(26, 35, 126, 0.3);
+        transition: all 0.3s;
+    }
+    
+    .btn-login:hover {
+        background: linear-gradient(135deg, var(--primary-light) 0%, var(--accent-purple) 100%);
+        box-shadow: 0 6px 20px rgba(26, 35, 126, 0.4);
+        transform: translateY(-2px);
+        color: white;
+    }
+    
+    .btn-register {
+        background: white;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 12px;
+        font-weight: 600;
+        border-radius: 8px;
+        width: 100%;
+        transition: all 0.3s;
+    }
+    
+    .btn-register:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+    
+    .form-control {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 12px 15px;
+        transition: all 0.3s;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(26, 35, 126, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block auth_content %}
+<div class="login-container">
+    <div class="text-center mb-4">
+        <div class="logo-login">
+            <i class="bi bi-camera-video-fill"></i>
+        </div>
+        <h1 class="login-title" style="color: var(--text-light);">Vigia</h1>
+    </div>
+    
+    <div class="login-card">
+        <h2 class="text-center mb-4" style="color: #333;">Bienvenido</h2>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <form method="POST" action="{{ url_for('login') }}">
+            <div class="mb-3">
+                <label for="correo" class="form-label">Correo</label>
+                <div class="input-group-icon">
+                    <i class="bi bi-person"></i>
+                    <input type="email" class="form-control" id="correo" name="correo" 
+                           placeholder="Correo" required autofocus>
+                </div>
+            </div>
+            
+            <div class="mb-4">
+                <label for="contraseña" class="form-label">Contraseña</label>
+                <div class="input-group-icon">
+                    <i class="bi bi-lock"></i>
+                    <input type="password" class="form-control" id="contraseña" name="contraseña" 
+                           placeholder="Contraseña" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="btn btn-login mb-3">
+                Iniciar sesión
+            </button>
+            
+            <a href="{{ url_for('registro') }}" class="btn btn-register">
+                Registrarse
+            </a>
+        </form>
+    </div>
+    
+    <div class="text-center mt-4" style="color: var(--text-light);">
+        <small>Sistema de Detección de Amenazas - Seguridad Nacional</small>
+    </div>
+</div>
+{% endblock %}
+

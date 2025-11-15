@@ -1,0 +1,313 @@
+{% extends "base.html" %}
+
+{% block title %}Configurar Alertas - Vigia{% endblock %}
+
+{% block page_title %}Configuración{% endblock %}
+{% block page_subtitle %}Notificaciones y Destinatarios{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Configuración</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Formulario para agregar destinatario -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-person-plus"></i> Agregar Destinatario</h3>
+            </div>
+            <div class="box-body">
+                <form method="POST" action="{{ url_for('configurar_alertas') }}">
+                    <input type="hidden" name="accion" value="agregar">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="ubicacion" class="form-label">Ubicación *</label>
+                            <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                                   list="ubicaciones-list" placeholder="Ej: Edificio A, Piso 3" required>
+                            <datalist id="ubicaciones-list">
+                                {% for ubicacion in ubicaciones_existentes %}
+                                <option value="{{ ubicacion }}">
+                                {% endfor %}
+                            </datalist>
+                            <div class="form-text">Ubicación donde se detectarán las alertas</div>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="nombre" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" 
+                                   placeholder="Ej: Equipo de Seguridad" required>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" 
+                                   placeholder="seguridad@ejemplo.com">
+                            <div class="form-text">Opcional: para notificaciones por email</div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" 
+                                   placeholder="+1234567890">
+                            <div class="form-text">Opcional: para SMS</div>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-plus-circle"></i> Agregar Destinatario
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de destinatarios -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-list-ul"></i> Destinatarios Configurados
+                    <span class="badge badge-info">{{ destinatarios|length }}</span>
+                    {% if servicios_emergencia|length > 0 %}
+                    <span class="badge badge-danger">🚨 {{ servicios_emergencia|length }} Servicio(s) de Emergencia</span>
+                    {% endif %}
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if destinatarios %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Ubicación</th>
+                                <th>Nombre</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Fecha Creación</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for dest in destinatarios %}
+                            <tr {% if 'bomberos' in dest.nombre.lower() or 'policia' in dest.nombre.lower() %}class="table-warning"{% endif %}>
+                                <td>
+                                    <i class="bi bi-geo-alt text-primary"></i> 
+                                    <strong>{{ dest.ubicacion }}</strong>
+                                </td>
+                                <td>
+                                    {% if 'bomberos' in dest.nombre.lower() or 'policia' in dest.nombre.lower() %}
+                                        <span class="badge bg-danger me-2">🚨 EMERGENCIA</span>
+                                    {% endif %}
+                                    {{ dest.nombre }}
+                                </td>
+                                <td>
+                                    {% if dest.email %}
+                                        <i class="bi bi-envelope"></i> {{ dest.email }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if dest.telefono %}
+                                        <i class="bi bi-telephone"></i> {{ dest.telefono }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if dest.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if dest.fecha_creacion %}
+                                        {{ dest.fecha_creacion.split('T')[0] if 'T' in dest.fecha_creacion else dest.fecha_creacion }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <form method="POST" action="{{ url_for('configurar_alertas') }}" style="display: inline;">
+                                        <input type="hidden" name="accion" value="toggle">
+                                        <input type="hidden" name="id" value="{{ dest.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-warning" 
+                                                title="{% if dest.activo %}Desactivar{% else %}Activar{% endif %}">
+                                            <i class="bi bi-{% if dest.activo %}pause{% else %}play{% endif %}-circle"></i>
+                                        </button>
+                                    </form>
+                                    <form method="POST" action="{{ url_for('configurar_alertas') }}" style="display: inline;" 
+                                          onsubmit="return confirm('¿Estás seguro de eliminar este destinatario?');">
+                                        <input type="hidden" name="accion" value="eliminar">
+                                        <input type="hidden" name="id" value="{{ dest.id }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-info">
+                    <i class="bi bi-info-circle"></i> No hay destinatarios configurados. Agrega uno arriba para comenzar a recibir alertas.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Servicios de Emergencia (si existen) -->
+{% if servicios_emergencia|length > 0 %}
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="box box-danger">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-exclamation-triangle-fill"></i> Servicios de Emergencia Creados Automáticamente
+                    <span class="badge badge-danger">{{ servicios_emergencia|length }}</span>
+                </h3>
+            </div>
+            <div class="box-body">
+                <div class="alert alert-warning">
+                    <i class="bi bi-info-circle"></i> Estos servicios se crean automáticamente cuando se detectan alertas críticas (confianza ≥80%).
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Ubicación</th>
+                                <th>Servicio</th>
+                                <th>Email</th>
+                                <th>Teléfono</th>
+                                <th>Estado</th>
+                                <th>Fecha Creación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for servicio in servicios_emergencia %}
+                            <tr class="table-warning">
+                                <td>
+                                    <i class="bi bi-geo-alt text-danger"></i> 
+                                    <strong>{{ servicio.ubicacion }}</strong>
+                                </td>
+                                <td>
+                                    <span class="badge bg-danger me-2">🚨 EMERGENCIA</span>
+                                    {{ servicio.nombre }}
+                                </td>
+                                <td>
+                                    <i class="bi bi-envelope"></i> {{ servicio.email }}
+                                </td>
+                                <td>
+                                    <i class="bi bi-telephone"></i> {{ servicio.telefono }}
+                                </td>
+                                <td>
+                                    {% if servicio.activo %}
+                                        <span class="badge bg-success">Activo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactivo</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if servicio.fecha_creacion %}
+                                        {{ servicio.fecha_creacion.split('T')[0] if 'T' in servicio.fecha_creacion else servicio.fecha_creacion }}
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Historial de envíos -->
+<div class="row">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-clock-history"></i> Historial de Envíos Recientes
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if historial %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Fecha/Hora</th>
+                                <th>Ubicación</th>
+                                <th>Tipo Alerta</th>
+                                <th>Destinatario</th>
+                                <th>Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for envio in historial %}
+                            <tr>
+                                <td>
+                                    {% if envio.fecha_envio %}
+                                        {% set fecha = envio.fecha_envio.split('T')[0] if 'T' in envio.fecha_envio else envio.fecha_envio.split(' ')[0] %}
+                                        {% set hora = envio.fecha_envio.split('T')[1] if 'T' in envio.fecha_envio else envio.fecha_envio.split(' ')[1] if ' ' in envio.fecha_envio else '' %}
+                                        {{ fecha }}<br>
+                                        <small class="text-muted">{{ hora.split('.')[0] if '.' in hora else hora }}</small>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <i class="bi bi-geo-alt"></i> {{ envio.ubicacion }}
+                                </td>
+                                <td>
+                                    {% if envio.tipo_alerta == 'arma' %}
+                                        <span class="badge bg-danger">🔫 Arma</span>
+                                    {% elif envio.tipo_alerta == 'incendio' %}
+                                        <span class="badge bg-warning">🔥 Incendio</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ envio.tipo_alerta }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if envio.destinatario_nombre %}
+                                        {{ envio.destinatario_nombre }}
+                                        {% if envio.email %}
+                                            <br><small class="text-muted">{{ envio.email }}</small>
+                                        {% endif %}
+                                    {% else %}
+                                        <span class="text-muted">Destinatario eliminado</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if envio.estado == 'enviado' %}
+                                        <span class="badge bg-success">Enviado</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ envio.estado }}</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary">
+                    <i class="bi bi-info-circle"></i> No hay envíos registrados aún.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

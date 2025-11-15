@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alertas - Ojo de Dios</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="static/css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="index.html">
+                <i class="bi bi-eye-fill"></i> Ojo de Dios
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="index.html">
+                            <i class="bi bi-house"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="analizar.html">
+                            <i class="bi bi-camera"></i> Analizar Imagen
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="dashboard.html">
+                            <i class="bi bi-speedometer2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="alertas.html">
+                            <i class="bi bi-bell"></i> Alertas
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container-fluid py-4">
+        <div class="row mb-4">
+            <div class="col-12">
+                <h2 class="mb-4">
+                    <i class="bi bi-bell"></i> Historial de Alertas
+                </h2>
+            </div>
+        </div>
+
+        <!-- Filtros -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+                    </div>
+                    <div class="card-body">
+                        <form class="row g-3" onsubmit="filtrarAlertas(event)">
+                            <div class="col-md-3">
+                                <label for="tipo" class="form-label">Tipo de Alerta</label>
+                                <select class="form-select" id="tipo">
+                                    <option value="">Todos</option>
+                                    <option value="arma">Arma</option>
+                                    <option value="incendio">Incendio</option>
+                                    <option value="vehiculo">Vehículo</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                                <input type="date" class="form-control" id="fecha_desde">
+                            </div>
+                            <div class="col-md-3">
+                                <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                                <input type="date" class="form-control" id="fecha_hasta">
+                            </div>
+                            <div class="col-md-3 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="bi bi-search"></i> Filtrar
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lista de Alertas -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0">
+                            <i class="bi bi-list-ul"></i> Alertas 
+                            <span class="badge bg-light text-dark" id="contadorAlertas">0</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Fecha/Hora</th>
+                                        <th>Tipo</th>
+                                        <th>Objeto Detectado</th>
+                                        <th>Confianza</th>
+                                        <th>Coordenadas</th>
+                                        <th>Acciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tablaAlertas">
+                                    <!-- Se cargará dinámicamente -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-dark text-light text-center py-3 mt-5">
+        <div class="container">
+            <p class="mb-0">
+                <i class="bi bi-shield-check"></i> 
+                Sistema de Detección de Amenazas - Seguridad Nacional
+            </p>
+            <small class="text-muted">Powered by Google Cloud Vision AI</small>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let todasLasAlertas = [];
+
+        // Intentar cargar desde la API del servidor Flask primero
+        // Si no está disponible, usar data.json
+        fetch('/api/alertas?limit=100')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Servidor no disponible');
+            })
+            .then(alertas => {
+                todasLasAlertas = alertas;
+                mostrarAlertas(todasLasAlertas);
+            })
+            .catch(error => {
+                console.log('Servidor Flask no disponible, usando datos de ejemplo');
+                // Si el servidor no está disponible, usar data.json
+                return fetch('data.json')
+                    .then(response => response.json())
+                    .then(data => {
+                        todasLasAlertas = data.alertas || [];
+                        mostrarAlertas(todasLasAlertas);
+                    });
+            })
+            .catch(error => {
+                console.error('Error cargando datos:', error);
+                mostrarAlertas([]);
+            });
+
+        function filtrarAlertas(event) {
+            event.preventDefault();
+            const tipo = document.getElementById('tipo').value;
+            const fechaDesde = document.getElementById('fecha_desde').value;
+            const fechaHasta = document.getElementById('fecha_hasta').value;
+
+            let alertasFiltradas = todasLasAlertas;
+
+            if (tipo) {
+                alertasFiltradas = alertasFiltradas.filter(a => a.tipo === tipo);
+            }
+
+            if (fechaDesde) {
+                alertasFiltradas = alertasFiltradas.filter(a => a.fecha_hora >= fechaDesde);
+            }
+
+            if (fechaHasta) {
+                alertasFiltradas = alertasFiltradas.filter(a => a.fecha_hora <= fechaHasta + 'T23:59:59');
+            }
+
+            mostrarAlertas(alertasFiltradas);
+        }
+
+        function mostrarAlertas(alertas) {
+            document.getElementById('contadorAlertas').textContent = alertas.length;
+
+            if (alertas.length === 0) {
+                document.getElementById('tablaAlertas').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-5">
+                            <i class="bi bi-inbox" style="font-size: 3rem; color: #ccc;"></i>
+                            <p class="text-muted mt-3">No se encontraron alertas</p>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            let html = '';
+            alertas.forEach(alerta => {
+                const tipoBadge = {
+                    'arma': '<span class="badge bg-danger">🔫 Arma</span>',
+                    'incendio': '<span class="badge bg-warning">🔥 Incendio</span>',
+                    'vehiculo': '<span class="badge bg-info">🚗 Vehículo</span>'
+                };
+
+                const confianzaColor = alerta.confianza >= 0.8 ? 'bg-success' : 
+                                     alerta.confianza >= 0.6 ? 'bg-warning' : 'bg-danger';
+
+                const coordenadas = (alerta.x1 !== null && alerta.y1 !== null) ?
+                    `(${alerta.x1.toFixed(3)}, ${alerta.y1.toFixed(3)})<br>→ (${alerta.x2.toFixed(3)}, ${alerta.y2.toFixed(3)})` :
+                    '<span class="text-muted">N/A</span>';
+
+                html += `
+                    <tr>
+                        <td><strong>#${alerta.id}</strong></td>
+                        <td>${alerta.fecha_hora}</td>
+                        <td>${tipoBadge[alerta.tipo] || '<span class="badge bg-secondary">' + alerta.tipo + '</span>'}</td>
+                        <td>${alerta.objeto}</td>
+                        <td>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar ${confianzaColor}" role="progressbar" 
+                                     style="width: ${(alerta.confianza * 100)}%">
+                                    ${(alerta.confianza * 100).toFixed(1)}%
+                                </div>
+                            </div>
+                        </td>
+                        <td>${coordenadas}</td>
+                        <td>
+                            <button class="btn btn-sm btn-outline-primary" disabled title="Ver imagen">
+                                <i class="bi bi-image"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('tablaAlertas').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+

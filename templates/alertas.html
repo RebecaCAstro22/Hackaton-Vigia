@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}Alertas - Vigia{% endblock %}
+
+{% block page_title %}Alertas{% endblock %}
+{% block page_subtitle %}Registro de Incidentes{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Alertas</li>
+{% endblock %}
+
+{% block content %}
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-funnel"></i> Filtros</h3>
+            </div>
+            <div class="box-body">
+                <form method="GET" action="{{ url_for('alertas') }}" class="row g-3">
+                    <div class="col-md-3">
+                        <label for="tipo" class="form-label">Tipo de Alerta</label>
+                        <select class="form-select" id="tipo" name="tipo">
+                            <option value="">Todos</option>
+                            <option value="arma" {% if tipo_filtro == 'arma' %}selected{% endif %}>Arma</option>
+                            <option value="incendio" {% if tipo_filtro == 'incendio' %}selected{% endif %}>Incendio</option>
+                            <option value="agresion" {% if tipo_filtro == 'agresion' %}selected{% endif %}>Agresión</option>
+                            <option value="vehiculo" {% if tipo_filtro == 'vehiculo' %}selected{% endif %}>Vehículo</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fecha_desde" class="form-label">Fecha Desde</label>
+                        <input type="date" class="form-control" id="fecha_desde" name="fecha_desde" 
+                               value="{{ request.args.get('fecha_desde', '') }}">
+                    </div>
+                    <div class="col-md-3">
+                        <label for="fecha_hasta" class="form-label">Fecha Hasta</label>
+                        <input type="date" class="form-control" id="fecha_hasta" name="fecha_hasta"
+                               value="{{ request.args.get('fecha_hasta', '') }}">
+                    </div>
+                    <div class="col-md-3 d-flex align-items-end">
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search"></i> Filtrar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Lista de Alertas -->
+<div class="row">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title">
+                    <i class="bi bi-list-ul"></i> Alertas 
+                    <span class="badge badge-primary">{{ alertas|length }}</span>
+                </h3>
+            </div>
+            <div class="box-body">
+                {% if alertas %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Ubicación</th>
+                                <th>Tipo</th>
+                                <th>Objeto Detectado</th>
+                                <th>Confianza</th>
+                                <th>Coordenadas</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alerta in alertas %}
+                            <tr>
+                                <td><strong>#{{ alerta.id }}</strong></td>
+                                <td>
+                                    {% if alerta.fecha_hora %}
+                                        {{ alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0] }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.fecha_hora %}
+                                        {% set hora = alerta.fecha_hora.split('T')[1] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else '' %}
+                                        {{ hora.split('.')[0] if '.' in hora else hora }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.ubicacion %}
+                                        <i class="bi bi-geo-alt text-primary"></i> {{ alerta.ubicacion }}
+                                    {% else %}
+                                        <span class="text-muted">No especificada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.tipo == 'arma' %}
+                                        <span class="badge bg-danger">🔫 Arma</span>
+                                    {% elif alerta.tipo == 'incendio' %}
+                                        <span class="badge bg-warning">🔥 Incendio</span>
+                                    {% elif alerta.tipo == 'agresion' %}
+                                        <span class="badge bg-danger">⚔️ Agresión</span>
+                                    {% elif alerta.tipo == 'vehiculo' %}
+                                        <span class="badge bg-info">🚗 Vehículo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ alerta.tipo }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ alerta.objeto }}</td>
+                                <td>
+                                    <div class="progress" style="height: 25px;">
+                                        {% set confianza_val = alerta.confianza if alerta.confianza is not none else 0.0 %}
+                                        <div class="progress-bar 
+                                            {% if confianza_val >= 0.8 %}bg-success
+                                            {% elif confianza_val >= 0.6 %}bg-warning
+                                            {% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ (confianza_val * 100) }}%">
+                                            {{ "%.1f"|format(confianza_val * 100) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if alerta.x1 is not none and alerta.y1 is not none and alerta.x2 is not none and alerta.y2 is not none %}
+                                        ({{ "%.3f"|format(alerta.x1) }}, {{ "%.3f"|format(alerta.y1) }})<br>
+                                        → ({{ "%.3f"|format(alerta.x2) }}, {{ "%.3f"|format(alerta.y2) }})
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a href="/imagen/{{ alerta.imagen.split('/')[-1] }}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-primary"
+                                       title="Ver imagen">
+                                        <i class="bi bi-image"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <p class="text-muted mt-3">No se encontraron alertas con los filtros seleccionados</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

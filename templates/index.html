@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Inicio - Vigia{% endblock %}
+
+{% block page_title %}Inicio{% endblock %}
+{% block page_subtitle %}Sistema de Seguridad Nacional{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Inicio</li>
+{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-camera"></i> Análisis de Imágenes</h3>
+            </div>
+            <div class="box-body text-center">
+                <i class="bi bi-camera-fill" style="font-size: 4rem; color: #3c8dbc; margin: 20px 0;"></i>
+                <p class="text-muted">
+                    Procesamiento inteligente de imágenes para identificación de amenazas
+                </p>
+                <a href="{{ url_for('analizar') }}" class="btn btn-primary btn-block">
+                    <i class="bi bi-upload"></i> Analizar Ahora
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-speedometer2"></i> Dashboard</h3>
+            </div>
+            <div class="box-body text-center">
+                <i class="bi bi-speedometer2" style="font-size: 4rem; color: #00a65a; margin: 20px 0;"></i>
+                <p class="text-muted">
+                    Monitoreo en tiempo real y análisis de datos operativos
+                </p>
+                <a href="{{ url_for('dashboard') }}" class="btn btn-success btn-block">
+                    <i class="bi bi-graph-up"></i> Ver Dashboard
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="box box-warning">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-bell"></i> Alertas</h3>
+            </div>
+            <div class="box-body text-center">
+                <i class="bi bi-bell-fill" style="font-size: 4rem; color: #f39c12; margin: 20px 0;"></i>
+                <p class="text-muted">
+                    Historial completo de alertas y eventos de seguridad
+                </p>
+                <a href="{{ url_for('alertas') }}" class="btn btn-warning btn-block">
+                    <i class="bi bi-list-ul"></i> Ver Alertas
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-shield-check"></i> Capacidades del Sistema</h3>
+            </div>
+            <div class="box-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-red"><i class="bi bi-shield-exclamation"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Detección de Armas</span>
+                                <span class="progress-description">Identificación automática de objetos peligrosos mediante análisis de imagen avanzado</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-yellow"><i class="bi bi-fire"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Detección de Incendios</span>
+                                <span class="progress-description">Reconocimiento temprano de fuego, llamas y signos de combustión</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-aqua"><i class="bi bi-car-front"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Monitoreo Vehicular</span>
+                                <span class="progress-description">Análisis de vehículos y patrones de comportamiento sospechoso</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="info-box">
+                            <span class="info-box-icon bg-green"><i class="bi bi-cpu"></i></span>
+                            <div class="info-box-content">
+                                <span class="info-box-text">Procesamiento en Tiempo Real</span>
+                                <span class="progress-description">Análisis instantáneo con tecnología de visión artificial</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Vigia{% endblock %}
+
+{% block page_title %}Dashboard{% endblock %}
+{% block page_subtitle %}Panel de Control{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<!-- Info Boxes -->
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="bi bi-bell"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Total Alertas</span>
+                <span class="info-box-number">{{ total_alertas }}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: 100%"></div>
+                </div>
+                <span class="progress-description">Registros totales</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="bi bi-shield-exclamation"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Armas Detectadas</span>
+                <span class="info-box-number">{{ total_armas }}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {% if total_alertas > 0 %}{{ (total_armas / total_alertas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Amenazas críticas</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-yellow"><i class="bi bi-fire"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Incendios Detectados</span>
+                <span class="info-box-number">{{ total_incendios }}</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-warning" style="width: {% if total_alertas > 0 %}{{ (total_incendios / total_alertas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Eventos de fuego</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-red"><i class="bi bi-exclamation-triangle"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Agresiones</span>
+                <span class="info-box-number">{{ total_agresiones }}</span>
+                <div class="progress">
+                    <div class="progress-bar progress-bar-danger" style="width: {% if total_alertas > 0 %}{{ (total_agresiones / total_alertas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Eventos de agresión</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3 col-xs-6">
+        <div class="info-box">
+            <span class="info-box-icon bg-aqua"><i class="bi bi-car-front"></i></span>
+            <div class="info-box-content">
+                <span class="info-box-text">Vehículos</span>
+                <span class="info-box-number">{{ total_vehiculos }}</span>
+                <div class="progress">
+                    <div class="progress-bar" style="width: {% if total_alertas > 0 %}{{ (total_vehiculos / total_alertas * 100) }}{% else %}0{% endif %}%"></div>
+                </div>
+                <span class="progress-description">Vehículos monitoreados</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Row 2 -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-clock-history"></i> Últimas 24 Horas</h3>
+            </div>
+            <div class="box-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h3 style="color: #3c8dbc; font-weight: bold; font-size: 2.5rem; margin: 10px 0;">{{ alertas_24h }}</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; font-weight: 500;">Total Alertas</p>
+                    </div>
+                    <div class="col-6">
+                        <h3 style="color: #dd4b39; font-weight: bold; font-size: 2.5rem; margin: 10px 0;">{{ alertas_criticas_24h }}</h3>
+                        <p class="text-muted" style="font-size: 0.9rem; font-weight: 500;">Alertas Críticas</p>
+                    </div>
+                </div>
+                {% if alertas_intermedias_24h > 0 or alertas_bajas_24h > 0 %}
+                <div class="row text-center" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #d2d6de;">
+                    {% if alertas_intermedias_24h > 0 %}
+                    <div class="col-6">
+                        <h4 style="color: #f39c12; font-weight: bold; margin: 5px 0;">{{ alertas_intermedias_24h }}</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">Intermedio (20-50%)</p>
+                    </div>
+                    {% endif %}
+                    {% if alertas_bajas_24h > 0 %}
+                    <div class="col-6">
+                        <h4 style="color: #777; font-weight: bold; margin: 5px 0;">{{ alertas_bajas_24h }}</h4>
+                        <p class="text-muted" style="font-size: 0.85rem;">Bajas (&lt;20%)</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-graph-up"></i> Gráfico de Alertas (7 días)</h3>
+            </div>
+            <div class="box-body">
+                <canvas id="chartAlertas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Alertas Recientes -->
+<div class="row">
+    <div class="col-12">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-list-ul"></i> Alertas Recientes</h3>
+            </div>
+            <div class="box-body">
+                {% if alertas_recientes %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Fecha</th>
+                                <th>Hora</th>
+                                <th>Ubicación</th>
+                                <th>Tipo</th>
+                                <th>Objeto</th>
+                                <th>Confianza</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for alerta in alertas_recientes %}
+                            <tr>
+                                <td>#{{ alerta.id }}</td>
+                                <td>
+                                    {% if alerta.fecha_hora %}
+                                        {{ alerta.fecha_hora.split('T')[0] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[0] }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.fecha_hora %}
+                                        {% set hora = alerta.fecha_hora.split('T')[1] if 'T' in alerta.fecha_hora else alerta.fecha_hora.split(' ')[1] if ' ' in alerta.fecha_hora else '' %}
+                                        {{ hora.split('.')[0] if '.' in hora else hora }}
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.ubicacion %}
+                                        <i class="bi bi-geo-alt"></i> {{ alerta.ubicacion }}
+                                    {% else %}
+                                        <span class="text-muted">No especificada</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if alerta.tipo == 'arma' %}
+                                        <span class="badge bg-danger">🔫 Arma</span>
+                                    {% elif alerta.tipo == 'incendio' %}
+                                        <span class="badge bg-warning">🔥 Incendio</span>
+                                    {% elif alerta.tipo == 'vehiculo' %}
+                                        <span class="badge bg-info">🚗 Vehículo</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">{{ alerta.tipo }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ alerta.objeto }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        {% set confianza_val = alerta.confianza if alerta.confianza is not none else 0.0 %}
+                                        <div class="progress-bar" role="progressbar" 
+                                             style="width: {{ (confianza_val * 100) }}%">
+                                            {{ "%.1f"|format(confianza_val * 100) }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <a href="/imagen/{{ alerta.imagen.split('/')[-1] }}" 
+                                       target="_blank" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        <i class="bi bi-image"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted text-center">No hay alertas recientes</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Gráfico de alertas por día
+const ctx = document.getElementById('chartAlertas').getContext('2d');
+const alertasData = {{ alertas_por_dia | tojson }};
+
+const fechas = alertasData.map(item => item.fecha);
+const cantidades = alertasData.map(item => item.cantidad);
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: fechas,
+        datasets: [{
+            label: 'Alertas',
+            data: cantidades,
+            borderColor: 'rgb(75, 192, 192)',
+            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+            tension: 0.1
+        }]
+    },
+    options: {
+        responsive: true,
+        plugins: {
+            legend: {
+                display: false
+            }
+        },
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+});
+</script>
+{% endblock %}
+
+
+

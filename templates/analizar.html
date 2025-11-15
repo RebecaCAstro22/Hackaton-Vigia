@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Analizar Imagen - Vigia{% endblock %}
+
+{% block page_title %}Análisis de Imágenes{% endblock %}
+{% block page_subtitle %}Procesamiento de Imágenes{% endblock %}
+
+{% block breadcrumb %}
+<li class="active">Análisis</li>
+{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="box box-primary">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-upload"></i> Subir Imagen</h3>
+            </div>
+            <div class="box-body">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label for="imagen" class="form-label">Seleccionar Imagen</label>
+                        <input type="file" class="form-control" id="imagen" name="imagen" accept="image/*" required>
+                        <div class="form-text">
+                            Formatos soportados: JPG, PNG, GIF, WEBP (máx. 16MB)
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="ubicacion" class="form-label">
+                            <i class="bi bi-geo-alt"></i> Ubicación
+                        </label>
+                        <input type="text" class="form-control" id="ubicacion" name="ubicacion" 
+                               placeholder="Ej: Edificio A, Piso 3, Cámara 1" required>
+                        <div class="form-text">
+                            Especifica la ubicación donde se tomó la imagen
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100" id="btnAnalizar">
+                        <i class="bi bi-search"></i> Analizar Imagen
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="box box-info">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-image"></i> Vista Previa</h3>
+            </div>
+            <div class="box-body text-center">
+                <div id="previewContainer" style="display: none;">
+                    <img id="previewImage" class="img-fluid rounded" alt="Vista previa">
+                </div>
+                <div id="noPreview" class="text-muted">
+                    <i class="bi bi-image" style="font-size: 4rem;"></i>
+                    <p class="mt-3">Selecciona una imagen para ver la vista previa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" id="resultadosContainer" style="display: none;">
+    <div class="col-12">
+        <div class="box box-success">
+            <div class="box-header with-border">
+                <h3 class="box-title"><i class="bi bi-check-circle"></i> Resultados del Análisis</h3>
+            </div>
+            <div class="box-body">
+                <div id="resultados"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4" id="errorContainer" style="display: none;">
+    <div class="col-12">
+        <div class="alert alert-danger" role="alert">
+            <i class="bi bi-exclamation-triangle"></i>
+            <strong>Error:</strong> <span id="errorMessage"></span>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.getElementById('imagen').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('previewImage').src = e.target.result;
+            document.getElementById('previewContainer').style.display = 'block';
+            document.getElementById('noPreview').style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+    }
+});
+
+document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData();
+    const fileInput = document.getElementById('imagen');
+    const ubicacionInput = document.getElementById('ubicacion');
+    const btnAnalizar = document.getElementById('btnAnalizar');
+    
+    if (!fileInput.files[0]) {
+        alert('Por favor selecciona una imagen');
+        return;
+    }
+    
+    if (!ubicacionInput.value.trim()) {
+        alert('Por favor especifica la ubicación');
+        return;
+    }
+    
+    formData.append('imagen', fileInput.files[0]);
+    formData.append('ubicacion', ubicacionInput.value.trim());
+    
+    // Mostrar loading
+    btnAnalizar.disabled = true;
+    btnAnalizar.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Analizando...';
+    document.getElementById('resultadosContainer').style.display = 'none';
+    document.getElementById('errorContainer').style.display = 'none';
+    
+    try {
+        const response = await fetch('{{ url_for("analizar") }}', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (data.alertas && data.alertas.length > 0) {
+                mostrarResultados(data.alertas, data.imagen);
+            } else {
+                mostrarSinAmenazas(data.mensaje || 'No se detectaron amenazas', data.imagen);
+            }
+        } else {
+            mostrarError(data.error || 'Error desconocido');
+        }
+    } catch (error) {
+        mostrarError('Error al procesar la imagen: ' + error.message);
+    } finally {
+        btnAnalizar.disabled = false;
+        btnAnalizar.innerHTML = '<i class="bi bi-search"></i> Analizar Imagen';
+    }
+});
+
+function mostrarResultados(alertas, imagen) {
+    const iconos = {
+        'arma': '🔫',
+        'incendio': '🔥',
+        'vehiculo': '🚗'
+    };
+    
+    const colores = {
+        'arma': 'danger',
+        'incendio': 'warning',
+        'vehiculo': 'info'
+    };
+    
+    let html = `<h5 class="mb-3"><i class="bi bi-exclamation-triangle"></i> ${alertas.length} Alerta(s) Detectada(s)</h5>`;
+    
+    alertas.forEach((alerta, index) => {
+        const icono = iconos[alerta.tipo] || '⚠️';
+        const color = colores[alerta.tipo] || 'secondary';
+        
+        html += `
+            <div class="alert alert-${color} mb-3">
+                <h6>${icono} Alerta #${index + 1}: ${alerta.tipo.toUpperCase()}</h6>
+                <p class="mb-1"><strong>Objeto:</strong> ${alerta.objeto}</p>
+                <p class="mb-1"><strong>Confianza:</strong> ${(alerta.confianza * 100).toFixed(2)}%</p>
+                <p class="mb-2"><strong>Fecha/Hora:</strong> ${alerta.fecha_hora}</p>
+            </div>
+        `;
+    });
+    
+    html += `
+        <a href="/imagen/${imagen}" target="_blank" class="btn btn-primary">
+            <i class="bi bi-image"></i> Ver Imagen Original
+        </a>
+    `;
+    
+    document.getElementById('resultados').innerHTML = html;
+    document.getElementById('resultadosContainer').style.display = 'block';
+}
+
+function mostrarSinAmenazas(mensaje, imagen) {
+    const html = `
+        <div class="alert alert-success">
+            <h5><i class="bi bi-check-circle"></i> ${mensaje}</h5>
+            <a href="/imagen/${imagen}" target="_blank" class="btn btn-sm btn-outline-success">
+                <i class="bi bi-image"></i> Ver Imagen Analizada
+            </a>
+        </div>
+    `;
+    
+    document.getElementById('resultados').innerHTML = html;
+    document.getElementById('resultadosContainer').style.display = 'block';
+}
+
+function mostrarError(mensaje) {
+    document.getElementById('errorMessage').textContent = mensaje;
+    document.getElementById('errorContainer').style.display = 'block';
+}
+</script>
+{% endblock %}
+

@@ -1,0 +1,42 @@
+# Credenciales y secretos
+*.json
+!package.json
+!package-lock.json
+hackaton-segiridad-*.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv
+
+# Bases de datos
+*.db
+*.sqlite
+*.sqlite3
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+
+# Archivos temporales
+*.tmp
+*.temp
+
+# Carpetas de uploads (opcional - descomenta si no quieres subir imágenes)
+# uploads/
+# alertas_frames/
+# reportes_usuarios/
+# reportes_poblacion/
+
